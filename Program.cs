@@ -1,3 +1,4 @@
+using Syncfusion.Blazor;
 using BlazorPurchaseOrders.Areas.Identity;
 using BlazorPurchaseOrders.Data;
 using Microsoft.AspNetCore.Components;
@@ -20,6 +21,12 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddSingleton<WeatherForecastService>();
+var sqlConnectionConfiguration = new SqlConnectionConfiguration(builder.Configuration.GetConnectionString("SqlDBContext"));
+builder.Services.AddSingleton(sqlConnectionConfiguration);
+
+builder.Services.AddScoped<IPOHeaderService, POHeaderService>();
+
+builder.Services.AddSyncfusionBlazor();
 
 var app = builder.Build();
 
@@ -27,6 +34,8 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
+    Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mjc3NzM5NUAzMjMzMmUzMDJlMzBKTjZ4eVgrM2JaNUZzOUdLc2hzYTZ2SGRPUTQ3OFlIOGtEckZhT2dDeWUwPQ==");
+
 }
 else
 {
