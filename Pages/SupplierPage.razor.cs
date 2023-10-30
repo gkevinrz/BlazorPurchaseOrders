@@ -1,23 +1,20 @@
 ﻿using BlazorPurchaseOrders.Data;
 using BlazorPurchaseOrders.Shared;
 using Microsoft.AspNetCore.Components;
-using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Navigations;
 using Syncfusion.Blazor.Popups;
 
 namespace BlazorPurchaseOrders.Pages
 {
-    public partial class TaxPage : ComponentBase
+    public partial class SupplierPage:ComponentBase
+
     {
-        [Inject] ITaxService TaxService { get; set; }
-
+        [Inject] ISupplierService SupplierService { get; set; }
         [Inject] NavigationManager NavigationManager { get; set; }
-
-
         //Dialog
-        SfDialog DialogAddEditTax;
+        SfDialog DialogAddEditSupplier;
         //Dialog for delete
-        SfDialog DialogDeleteTax;
+        SfDialog DialogDeleteSuppler;
 
         //warning component
         WarningPage Warning;
@@ -26,7 +23,8 @@ namespace BlazorPurchaseOrders.Pages
         string WarningContentMessage = "";
 
         // tax list
-        IEnumerable<Tax> tax;
+        IEnumerable<Supplier> supplier;
+
 
         // list of tools
         private List<ItemModel> Toolbaritems = new List<ItemModel>();
@@ -43,7 +41,7 @@ namespace BlazorPurchaseOrders.Pages
         // get tax list and add toolbar
         protected override async Task OnInitializedAsync()
         {
-           tax = await TaxService.TaxList();
+            tax = await TaxService.TaxList();
             // Add Tax
             Toolbaritems.Add(new ItemModel()
             {
@@ -71,23 +69,24 @@ namespace BlazorPurchaseOrders.Pages
         // handler for toolbar
         public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
         {
-            if (args.Item.Text== "Add")
+            if (args.Item.Text == "Add")
             {
                 // Open dialog (addedit)
 
                 addeditTax = new Tax(); //refresh
-                HeaderText= "Add Tax Rate";
+                HeaderText = "Add Tax Rate";
                 await this.DialogAddEditTax.ShowAsync();
 
 
-            }else if(args.Item.Text== "Edit")
+            }
+            else if (args.Item.Text == "Edit")
             {
-               //check if selectedindex !=0
-               if (SelectedTaxId == 0)
-               {
-                WarningHeaderMessage = "Warning!";
-                WarningContentMessage = "Please select a Tax Rate from the grid.";
-                Warning.OpenDialog();
+                //check if selectedindex !=0
+                if (SelectedTaxId == 0)
+                {
+                    WarningHeaderMessage = "Warning!";
+                    WarningContentMessage = "Please select a Tax Rate from the grid.";
+                    Warning.OpenDialog();
                 }
                 else
                 {
@@ -96,7 +95,8 @@ namespace BlazorPurchaseOrders.Pages
                     await this.DialogAddEditTax.ShowAsync();
                 }
 
-            }else if (args.Item.Text == "Delete")
+            }
+            else if (args.Item.Text == "Delete")
             {
                 if (SelectedTaxId == 0)
                 {
@@ -119,14 +119,14 @@ namespace BlazorPurchaseOrders.Pages
         {
             if (addeditTax.TaxID == 0)
             {
-                int success= await TaxService.TaxInsert(addeditTax.TaxDescription, addeditTax.TaxRate);
+                int success = await TaxService.TaxInsert(addeditTax.TaxDescription, addeditTax.TaxRate);
                 if (success != 0)
                 {
                     // Change dialog message (warning component)
                     WarningHeaderMessage = "Warning!";
                     WarningContentMessage = "This Tax Description already exists; it cannot be added again.";
                     Warning.OpenDialog();
-                    
+
                 }
                 else
                 {
@@ -208,6 +208,7 @@ namespace BlazorPurchaseOrders.Pages
                 SelectedTaxId = 0;
             }
         }
+
 
     }
 }
