@@ -1,0 +1,10 @@
+﻿@page "/purchaseorder/{POHeaderID:int}"
+@using BlazorPurchaseOrders.Data
+
+<h3>@pageTitle</h3>
+
+
+
+<EditForm Model="@orderAddEdit" OnValidSubmit="@OrderSave">
+
+</EditForm>

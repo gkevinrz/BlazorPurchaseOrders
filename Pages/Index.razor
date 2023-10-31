@@ -1,14 +1,63 @@
 ﻿@page "/"
-<div class="position-relative">
+@using BlazorPurchaseOrders.Data
 
-<h1 class="display-6 text-center ">
-        <div class="position-absolute top-50 start-50 translate-middle">
 
-    Welcome!
-    <small class="text-muted">Purchase Order System</small>
-        </div>
-</h1>
 
+
+
+<div class="d-flex flex-column bd-highlight mb-3 justify-content-center">
+
+    <div class="d-flex p-3 bd-highlight justify-content-center">
+        <h1 class="display-6">
+                Welcome! <small class="text-muted text-lig">Purchase Order System</small>
+        </h1>
+    </div>
+    <div class="d-flex justify-content-center">
+        <h2 class="bg-primary text-light p-3 rounded">Purchase Orders</h2>
+    </div>
+
+    <div class="d-flex p-3 bd-highlight justify-content-center">
+        
+            <SfGrid DataSource="@poHeaderList" Toolbar="Toolbaritems">
+                <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="POHeader"></GridEvents>
+
+
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(POHeader.POHeaderOrderNumber)" HeaderText="Order No" TextAlign="@TextAlign.Left" Width="20">
+                    <HeaderTemplate>
+                        <div>
+                            <i class="bi bi-hash"></i> Order No.
+                        </div>
+                    </HeaderTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(POHeader.POHeaderOrderDate)"
+                                HeaderText="Date"
+                                Format="d"
+                                TextAlign="@TextAlign.Center"
+                                Width="20"
+                                Type="ColumnType.Date">
+
+                    <HeaderTemplate>
+                        <div>
+                            <i class="bi bi-calendar"></i> Order Date
+                        </div>
+                    </HeaderTemplate>
+                    </GridColumn>
+
+                </GridColumns>
+
+            </SfGrid>
+
+
+      
+
+    </div>
+   
 </div>
+
+
+
 
 
