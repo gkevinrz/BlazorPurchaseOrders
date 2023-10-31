@@ -1,6 +1,7 @@
 ﻿using BlazorPurchaseOrders.Data;
 using BlazorPurchaseOrders.Shared;
 using Microsoft.AspNetCore.Components;
+using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Navigations;
 using Syncfusion.Blazor.Popups;
 
@@ -14,11 +15,10 @@ namespace BlazorPurchaseOrders.Pages
         //Dialog
         SfDialog DialogAddEditSupplier;
         //Dialog for delete
-        SfDialog DialogDeleteSuppler;
+        SfDialog DialogDeleteSupplier;
 
         //warning component
         WarningPage Warning;
-
         string WarningHeaderMessage = "";
         string WarningContentMessage = "";
 
@@ -30,37 +30,37 @@ namespace BlazorPurchaseOrders.Pages
         private List<ItemModel> Toolbaritems = new List<ItemModel>();
 
         //object 
-        Tax addeditTax = new Tax();
+        Supplier addeditSupplier = new Supplier();
 
         //text for header
         string HeaderText = "";
 
         //tax id for edit or delete
-        public int SelectedTaxId { get; set; } = 0;
+        public int SelectedSupplierId { get; set; } = 0;
 
         // get tax list and add toolbar
         protected override async Task OnInitializedAsync()
         {
-            tax = await TaxService.TaxList();
+             supplier = await SupplierService.SupplierList();
             // Add Tax
             Toolbaritems.Add(new ItemModel()
             {
                 Text = "Add",
-                TooltipText = "Add a new Tax Rate",
+                TooltipText = "Add a new Supplier",
                 PrefixIcon = "e-add"
             });
 
             Toolbaritems.Add(new ItemModel()
             {
                 Text = "Edit",
-                TooltipText = "Edit selected Tax Rate",
+                TooltipText = "Edit selected Supplier",
                 PrefixIcon = "e-edit"
             });
 
             Toolbaritems.Add(new ItemModel()
             {
                 Text = "Delete",
-                TooltipText = "Delete selected Tax Rate",
+                TooltipText = "Delete selected Supplier",
                 PrefixIcon = "e-delete"
             });
         }
@@ -73,58 +73,61 @@ namespace BlazorPurchaseOrders.Pages
             {
                 // Open dialog (addedit)
 
-                addeditTax = new Tax(); //refresh
-                HeaderText = "Add Tax Rate";
-                await this.DialogAddEditTax.ShowAsync();
+                addeditSupplier = new Supplier(); //refresh
+                HeaderText = "Add Supplier";
+                await this.DialogAddEditSupplier.ShowAsync();
 
 
             }
             else if (args.Item.Text == "Edit")
             {
                 //check if selectedindex !=0
-                if (SelectedTaxId == 0)
+                if (SelectedSupplierId == 0)
                 {
                     WarningHeaderMessage = "Warning!";
-                    WarningContentMessage = "Please select a Tax Rate from the grid.";
+                    WarningContentMessage = "Please select a Supplier from the grid.";
                     Warning.OpenDialog();
                 }
                 else
                 {
-                    HeaderText = "Edit Tax Rate";
-                    addeditTax = await TaxService.Tax_GetOne(SelectedTaxId);
-                    await this.DialogAddEditTax.ShowAsync();
+                    HeaderText = "Edit Supplier";
+                    addeditSupplier = await SupplierService.Supplier_GetOne(SelectedSupplierId);
+                    await this.DialogAddEditSupplier.ShowAsync();
                 }
 
             }
             else if (args.Item.Text == "Delete")
             {
-                if (SelectedTaxId == 0)
+                if (SelectedSupplierId == 0)
                 {
                     WarningHeaderMessage = "Warning!";
-                    WarningContentMessage = "Please select a Tax Rate from the grid.";
+                    WarningContentMessage = "Please select a Supplier from the grid.";
                     Warning.OpenDialog();
                 }
                 else
                 {
-                    HeaderText = "Delete Tax Rate";
-                    addeditTax = await TaxService.Tax_GetOne(SelectedTaxId);
-                    await this.DialogDeleteTax.ShowAsync();
+                    HeaderText = "Delete Supplier";
+                    addeditSupplier = await SupplierService.Supplier_GetOne(SelectedSupplierId);
+                    await this.DialogDeleteSupplier.ShowAsync();
                 }
             }
         }
 
 
         // Save new Tax
-        protected async Task TaxSave()
+        protected async Task SupplierSave()
         {
-            if (addeditTax.TaxID == 0)
+            if (addeditSupplier.SupplierID == 0)
             {
-                int success = await TaxService.TaxInsert(addeditTax.TaxDescription, addeditTax.TaxRate);
+                int success = await SupplierService.SupplierInsert(addeditSupplier.SupplierName, addeditSupplier.SupplierAddress1
+                ,addeditSupplier.SupplierAddress2,addeditSupplier.SupplierAddress3,addeditSupplier.SupplierPostCode,addeditSupplier.SupplierEmail
+                );
+                
                 if (success != 0)
                 {
                     // Change dialog message (warning component)
                     WarningHeaderMessage = "Warning!";
-                    WarningContentMessage = "This Tax Description already exists; it cannot be added again.";
+                    WarningContentMessage = "This Supplier Description already exists; it cannot be added again.";
                     Warning.OpenDialog();
 
                 }
@@ -132,7 +135,7 @@ namespace BlazorPurchaseOrders.Pages
                 {
                     // Clears the dialog and is ready for another entry
                     // User must specifically close or cancel the dialog 
-                    addeditTax = new Tax();
+                    addeditSupplier = new Supplier();
                     await CloseDialog();
                 }
 
@@ -140,7 +143,9 @@ namespace BlazorPurchaseOrders.Pages
             }
             else
             {
-                int Success = await TaxService.TaxUpdate(addeditTax.TaxDescription, addeditTax.TaxRate, SelectedTaxId, addeditTax.TaxIsArchived);
+                int Success = await SupplierService.SupplierUpdate(addeditSupplier.SupplierID, addeditSupplier.SupplierName, addeditSupplier.SupplierAddress1
+                , addeditSupplier.SupplierAddress2, addeditSupplier.SupplierAddress3, addeditSupplier.SupplierPostCode, addeditSupplier.SupplierEmail,addeditSupplier.SupplierIsArchived);
+
                 if (Success != 0)
                 {
                     //show dialog
@@ -150,17 +155,17 @@ namespace BlazorPurchaseOrders.Pages
                 }
                 else
                 {
-                    await this.DialogAddEditTax.HideAsync();
+                    await this.DialogAddEditSupplier.HideAsync();
                     this.StateHasChanged();
-                    addeditTax = new Tax();
-                    SelectedTaxId = 0;
+                    addeditSupplier = new Supplier();
+                    SelectedSupplierId = 0;
                 }
 
             }
 
             //End process
             //Refresh datagrid
-            tax = await TaxService.TaxList();
+            supplier = await SupplierService.SupplierList();
             StateHasChanged();
 
         }
@@ -170,14 +175,14 @@ namespace BlazorPurchaseOrders.Pages
         // Close dialog (addedit)
         private async Task CloseDialog()
         {
-            await this.DialogAddEditTax.HideAsync();
+            await this.DialogAddEditSupplier.HideAsync();
         }
 
         // handler for selected row
-        public void RowSelectHandler(RowSelectEventArgs<Tax> args)
+        public void RowSelectHandler(RowSelectEventArgs<Supplier> args)
         {
             //{args.Data} returns the current selected records.
-            SelectedTaxId = args.Data.TaxID;
+            SelectedSupplierId = args.Data.SupplierID;
         }
 
 
@@ -185,13 +190,17 @@ namespace BlazorPurchaseOrders.Pages
 
         public async void ConfirmDeleteNo()
         {
-            await DialogDeleteTax.HideAsync();
-            SelectedTaxId = 0;
+            await DialogDeleteSupplier.HideAsync();
+            SelectedSupplierId = 0;
         }
 
         public async void ConfirmDeleteYes()
         {
-            int Success = await TaxService.TaxUpdate(addeditTax.TaxDescription, addeditTax.TaxRate, SelectedTaxId, addeditTax.TaxIsArchived = true);
+
+            int Success = await SupplierService.SupplierUpdate(addeditSupplier.SupplierID, addeditSupplier.SupplierName, addeditSupplier.SupplierAddress1
+            , addeditSupplier.SupplierAddress2, addeditSupplier.SupplierAddress3, addeditSupplier.SupplierPostCode, addeditSupplier.SupplierEmail, addeditSupplier.SupplierIsArchived=true);
+
+
             if (Success != 0)
             {
                 //duplicate check
@@ -201,11 +210,11 @@ namespace BlazorPurchaseOrders.Pages
             }
             else
             {
-                await this.DialogDeleteTax.HideAsync();
-                tax = await TaxService.TaxList();
+                await this.DialogDeleteSupplier.HideAsync();
+                supplier = await SupplierService.SupplierList();
                 this.StateHasChanged();
-                addeditTax = new Tax();
-                SelectedTaxId = 0;
+                addeditSupplier = new Supplier();
+                SelectedSupplierId = 0;
             }
         }
 

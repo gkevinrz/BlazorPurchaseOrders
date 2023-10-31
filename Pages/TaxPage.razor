@@ -44,15 +44,20 @@
          </Header>
      </DialogTemplates>
      <EditForm Model="@addeditTax" OnValidSubmit="@TaxSave">
+         <DataAnnotationsValidator />
          <div>
              @* txt for description *@
              <SfTextBox Enabled="true" Placeholder="Description" FloatLabelType="@FloatLabelType.Always" @bind-Value="addeditTax.TaxDescription">
 
              </SfTextBox>
+             <ValidationMessage For="@(()=> addeditTax.TaxDescription)"/>
+
               @* txt numeric for rate *@
             <SfNumericTextBox Enabled="true" Placeholder="Tax Rate" Width="50" Format="p2" FloatLabelType="@FloatLabelType.Always" @bind-Value="addeditTax.TaxRate">
 
               </SfNumericTextBox>
+            <ValidationMessage For="@(()=> addeditTax.TaxRate)" />
+
          </div>
          <br />
          <br />

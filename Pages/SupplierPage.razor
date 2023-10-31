@@ -3,14 +3,14 @@
 @using Syncfusion.Blazor.Navigations
 
 <div class="d-flex justify-content-center">
-    <h2 class="bg-indigo text-dark p-2 rounded">Suppliers</h2>
+    <h2 class="bg-primary text-light p-2 rounded">Suppliers</h2>
 </div>
 <br />
 <div class="cl">
 </div>
 
 @* Datagrid for Supplier  ----------------------------------------------- *@
-<SfGrid DataSource="@supplier" Toolbar="@Toolbaritems">
+<SfGrid DataSource="@supplier" Toolbar="@Toolbaritems" AllowResizing="true">
     <GridColumns>
 
         @* First Column (supplier name) *@
@@ -18,7 +18,7 @@
 
         </GridColumn>
         @* Second Column (Supplier address) *@
-        <GridColumn Field="@nameof(Supplier.SupplierAddress1)" HeaderText="Address" TextAlign="TextAlign.Left" Width="50">
+        <GridColumn Field="@nameof(Supplier.CombinedAddress)" HeaderText="Address" TextAlign="TextAlign.Left" Width="60">
             <HeaderTemplate>
                 <div>
                     <span class="e-icons e-location"></span> Address
@@ -61,7 +61,7 @@
             <SfTextBox Enabled="true" Placeholder="" FloatLabelType="@FloatLabelType.Never" @bind-Value="addeditSupplier.SupplierAddress3">
             </SfTextBox>
             @* txt for post code  *@
-            <SfTextBox Enabled="true" Placeholder="Post Code" FloatLabelType="@FloatLabelType.Auto" @bind-Value="addeditSupplier.SupplierPostCode">
+            <SfTextBox CssClass="ToUpperCase" Enabled="true" Placeholder="Post Code" FloatLabelType="@FloatLabelType.Auto" @bind-Value="addeditSupplier.SupplierPostCode">
             </SfTextBox>
             @* txt for email  *@
             <SfTextBox Enabled="true" Placeholder="Email" FloatLabelType="@FloatLabelType.Auto" @bind-Value="addeditSupplier.SupplierEmail">
@@ -98,7 +98,7 @@
             <SfTextBox Enabled="false" Placeholder="" FloatLabelType="@FloatLabelType.Never" @bind-Value="addeditSupplier.SupplierAddress3">
             </SfTextBox>
             @* txt for post code  *@
-            <SfTextBox Enabled="false" Placeholder="Post Code" FloatLabelType="@FloatLabelType.Auto" @bind-Value="addeditSupplier.SupplierPostCode">
+            <SfTextBox CssClass="ToUpperCase"  Enabled="false" Placeholder="Post Code" FloatLabelType="@FloatLabelType.Auto" @bind-Value="addeditSupplier.SupplierPostCode">
             </SfTextBox>
             @* txt for email  *@
             <SfTextBox Enabled="false" Placeholder="Email" FloatLabelType="@FloatLabelType.Auto" @bind-Value="addeditSupplier.SupplierEmail">
@@ -121,3 +121,10 @@
 
 @* Warning dialog componenet------------------------------------------------------------*@
 <WarningPage @ref="Warning" WarningContentMessage="@WarningContentMessage" WarningHeaderMessage="@WarningHeaderMessage" />
+
+
+<style>
+    .e-control-wrapper.ToUpperCase .e-textbox {
+        text-transform: uppercase;
+    }
+</style>

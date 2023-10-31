@@ -16,22 +16,29 @@ namespace BlazorPurchaseOrders.Data
         /************************* Procs **********************/
 
         /* SQL Insert (create) - create a Product table row */
-        public async Task<bool> ProductInsert(Product product)
+        public async Task<int> ProductInsert(
+            string ProductCode,
+            string ProductDescription,
+            decimal ProductUnitPrice,
+            int ProductSupplierID)
         {
+
+            int Success = 0;
+            var parameters = new DynamicParameters();
+            parameters.Add("ProductCode", ProductCode, DbType.String);
+            parameters.Add("ProductDescription", ProductDescription, DbType.String);
+            parameters.Add("ProductUnitPrice", ProductUnitPrice, DbType.Decimal);
+            parameters.Add("ProductSupplierID", ProductSupplierID, DbType.Int32);
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+            
             using (var conn = new SqlConnection(_configuration.Value))
             {
-                // 5 parameters
-                var parameters = new DynamicParameters();
-                parameters.Add("ProductCode", product.ProductCode, dbType: DbType.String);
-                parameters.Add("ProductDescription", product.ProductDescription, DbType.String);
-                parameters.Add("ProductUnitPrice", product.ProductUnitPrice, DbType.Decimal);
-                parameters.Add("ProductSupplierID", product.ProductSupplierID, DbType.Int32);
-                parameters.Add("ProductIsArchived", product.ProductIsArchived, DbType.Boolean);
-
+         
                 await conn.ExecuteAsync("spProduct_Insert",parameters,commandType:CommandType.StoredProcedure);
-                
+                Success = parameters.Get<int>("@ReturnValue");
+
             }
-            return true;
+            return Success;
         }
 
         /* SQL Read (create) - get all rows */
@@ -61,21 +68,34 @@ namespace BlazorPurchaseOrders.Data
         }
 
         /* SQL Update (update) - Update one row by ProductID */
-        public async Task<bool> ProductUpdate(Product product)
-        {   
+        public async Task<int> ProductUpdate(
+            int ProductID,
+            string ProductCode,
+            string ProductDescription,
+            decimal ProductUnitPrice,
+            int ProductSupplierID,
+            bool ProductIsArchived) // Parameters
+        {
+            int Success = 0;
             var parameters = new DynamicParameters();
-            parameters.Add("ProductID",product.ProductID, DbType.Int32);
-            parameters.Add("ProductCode", product.ProductCode, DbType.String);
-            parameters.Add("ProductDescription", product.ProductDescription, DbType.String);
-            parameters.Add("ProductUnitPrice", product.ProductUnitPrice, DbType.Decimal);
-            parameters.Add("ProductSupplierID", product.ProductSupplierID, DbType.Int32);
-            parameters.Add("ProductIsArchived", product.ProductIsArchived, DbType.Boolean);
+           
+            parameters.Add("ProductID",ProductID, DbType.Int32);
+            parameters.Add("ProductCode", ProductCode, DbType.String);
+            parameters.Add("ProductDescription", ProductDescription, DbType.String);
+            parameters.Add("ProductUnitPrice", ProductUnitPrice, DbType.Decimal);
+            parameters.Add("ProductSupplierID", ProductSupplierID, DbType.Int32);
+            parameters.Add("ProductIsArchived", ProductIsArchived, DbType.Boolean);
+            // input parameter (return value)
+            parameters.Add("@ReturnValue", dbType: DbType.Int32, direction: ParameterDirection.ReturnValue);
+
             using (var conn = new SqlConnection(_configuration.Value))
             {    
                 // call procedure 
                 await conn.ExecuteAsync("spProduct_Update",parameters,commandType: CommandType.StoredProcedure);
+                // set Success var
+                Success = parameters.Get<int>("@ReturnValue");
             }        
-            return true;
+            return Success;
         }
     }
 

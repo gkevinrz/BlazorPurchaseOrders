@@ -6,9 +6,16 @@ namespace BlazorPurchaseOrders.Data
 {
     public interface IProductService
     {
-        Task<bool> ProductInsert(Product product);
+        Task<int> ProductInsert(string ProductCode,string ProductDescription,decimal ProductUnitPrice,int ProductSupplierID);
         Task<IEnumerable<Product>> ProductList();
         Task<Product> Product_GetOne(int ProductID);
-        Task<bool> ProductUpdate(Product product);
+        Task<int> ProductUpdate(
+                int ProductID,
+                string ProductCode,
+                string ProductDescription,
+                decimal ProductUnitPrice,
+                int ProductSupplierID,
+                bool ProductIsArchived
+                );
     }
 }
