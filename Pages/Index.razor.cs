@@ -11,65 +11,46 @@ namespace BlazorPurchaseOrders.Pages
         [Inject] NavigationManager NavigationManager { get; set; }
 
 
-        /* ------- Variables ----------*/
 
-        //POHeader List
-        IEnumerable<POHeader> poHeaderList;
+        // Create an empty list, named poheader, of empty POHeader objects.
+        IEnumerable<POHeader> poheader;
 
-        //Toolbaritems List
         private List<ItemModel> Toolbaritems = new List<ItemModel>();
-       
-       /*--------- Initialized -------------*/
-       protected override async Task OnInitializedAsync()
+
+        int POHeaderID = 0;
+
+        protected override async Task OnInitializedAsync()
         {
-            // get list POHeader from db
-            poHeaderList = await POHeaderService.POHeaderList();
+            //Populate the list of countries objects from the Countries table.
+            poheader = await POHeaderService.POHeaderList();
 
-            //add toolbar items
-
-            // Add item
-            Toolbaritems.Add(new ItemModel()
-            {
-                Text="Add",
-                TooltipText="Add a new order",
-                PrefixIcon="e-add"
-            });
-
-            // Edit item
-            Toolbaritems.Add(new ItemModel()
-            {
-                Text = "Edit",
-                TooltipText = "Edit selected order",
-                PrefixIcon = "e-edit"
-            });
-
-            // Delete item
-            Toolbaritems.Add(new ItemModel() { 
-                Text="Delete",
-                TooltipText="Delete selected order",
-                PrefixIcon="e-delete"
-            });
-
-
+            Toolbaritems.Add(new ItemModel() { Text = "Add", TooltipText = "Add a new order", PrefixIcon = "e-add" });
+            Toolbaritems.Add(new ItemModel() { Text = "Edit", TooltipText = "Edit selected order", PrefixIcon = "e-edit" });
+            Toolbaritems.Add(new ItemModel() { Text = "Delete", TooltipText = "Delete selected order", PrefixIcon = "e-delete" });
         }
 
 
-
-        /*--------------handlers ------------*/
-
-
-        // ToolbarClickHandler 
-        public void ToolbarClickHandler(ClickEventArgs args)
+        public void ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
         {
             if (args.Item.Text == "Add")
             {
-             
-            }else if(args.Item.Text == "Edit") { 
-            
-            }else if(args.Item.Text=="Delete") { 
-            
+                //Code for adding goes here
+                POHeaderID = 0;
+                NavigationManager.NavigateTo($"/purchaseorder/{POHeaderID}");
+
+            }
+
+            if (args.Item.Text == "Edit")
+            {
+                //Code for editing
+            }
+
+            if (args.Item.Text == "Edit")
+            {
+                //Code for deleting
             }
         }
+
 
     }
 }
