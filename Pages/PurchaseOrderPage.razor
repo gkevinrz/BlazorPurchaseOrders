@@ -218,6 +218,24 @@
                             FloatLabelType="@FloatLabelType.Always"
                             Placeholder="Select a Product"
                             Enabled="true">
+                <DropDownListTemplates TItem="Product">
+                    <HeaderTemplate>
+                        <span class='head'>
+                            <span class='productcode'>Code</span>
+                            <span class='description'>Description</span>
+                        </span>
+                    </HeaderTemplate>
+
+
+                    <ItemTemplate Context="contextName">
+                        <span class='item'>
+                         <span class='productcode'>@((contextName as Product).ProductCode)</span>
+                        <span class="description">@((contextName as Product).ProductDescription)</span>
+                        </span>
+
+                    </ItemTemplate>
+                </DropDownListTemplates>                              
+
                 <DropDownListFieldSettings Text="ProductCode" Value="ProductID"></DropDownListFieldSettings>
                 <DropDownListEvents TItem="Product" TValue="int" OnValueSelect="OnChangeProduct"></DropDownListEvents>
             </SfDropDownList>
@@ -234,9 +252,10 @@
                               FloatLabelType="@FloatLabelType.Always"
                               ShowSpinButton="false"
                               Format="n0"
-                              EnableRtl="true"
+                              Decimals="0"
+                              ValidateDecimalOnType="true"
             @bind-Value="addeditOrderLine.POLineProductQuantity"
-            @onfocusout='@POLineCalc'>
+            @onfocusout='@POLineCalc' CssClass="e-style">
             </SfNumericTextBox>
 
 
@@ -244,14 +263,15 @@
                               FloatLabelType="@FloatLabelType.Always"
                               ShowSpinButton="false"
                               Format="c2"
-                              EnableRtl="true"
-            @bind-Value="addeditOrderLine.POLineProductUnitPrice"  @onfocusout='@POLineCalc'></SfNumericTextBox>
+                              Decimals="2"
+                              ValidateDecimalOnType="true"
+            @bind-Value="addeditOrderLine.POLineProductUnitPrice" @onfocusout='@POLineCalc' CssClass="e-style"></SfNumericTextBox>
 
             <SfNumericTextBox Enabled="false" Placeholder="Net Price"
                               FloatLabelType="@FloatLabelType.Always"
                               ShowSpinButton="false"
                               Format="c2"
-                              EnableRtl="true"
+                              CssClass="e-style"
             @bind-Value="addeditOrderLine.POLineNetPrice">
             </SfNumericTextBox>
         </div>
@@ -272,15 +292,15 @@
                               FloatLabelType="@FloatLabelType.Always"
                               ShowSpinButton="false"
                               Format="p2"
-                              EnableRtl="true"
-            @bind-Value="addeditOrderLine.POLineTaxRate">
+                             
+            @bind-Value="addeditOrderLine.POLineTaxRate" >
             </SfNumericTextBox>
 
             <SfNumericTextBox Enabled="false" Placeholder="Tax Amount"
                               FloatLabelType="@FloatLabelType.Always"
                               ShowSpinButton="false"
                               Format="c2"
-                              EnableRtl="true"
+                             
             @bind-Value="addeditOrderLine.POLineTaxAmount">
             </SfNumericTextBox>
         </div>
@@ -289,16 +309,17 @@
                               FloatLabelType="@FloatLabelType.Always"
                               ShowSpinButton="false"
                               Format="c2"
-                              EnableRtl="true"
+                             
             @bind-Value="addeditOrderLine.POLineGrossPrice">
             </SfNumericTextBox>
         </div>
 
         <br />
-        <div class="e-footer-content">
+        <div class="e-footer-content" style="text-align:right; width:100%;">
             <div class="button-container">
-                <button type="button" class="e-btn e-normal" @onclick="@CloseDialog">Cancel</button>
                 <button type="submit" class="e-btn e-normal e-primary">Save</button>
+
+                <button type="button" class="e-btn e-normal" @onclick="@CloseDialog">Cancel</button>
             </div>
         </div>
     </EditForm>
@@ -312,7 +333,10 @@
 
 
 @* Delete Dialog  *@
-<SfDialog @ref="DialogDeleteOrderLine" IsModal="true" Width="500px" ShowCloseIcon="true" Visible="false">
+
+<ConfirmPage @ref="ConfirmDeletion" ConfirmHeaderMessage="@ConfirmHeaderMessage" ConfirmContentMessage="@ConfirmContentMessage" ConfirmationChanged="ConfirmDelete" />
+
+@* <SfDialog @ref="DialogDeleteOrderLine" IsModal="true" Width="500px" ShowCloseIcon="true" Visible="false">
     <DialogTemplates>
         <Header> Confirm Delete </Header>
         <Content>
@@ -323,7 +347,11 @@
         <DialogButton Content="Delete" IsPrimary="true" OnClick="@ConfirmDeleteYes" />
         <DialogButton Content="Cancel" IsPrimary="false" OnClick="@ConfirmDeleteNo" />
     </DialogButtons>
-</SfDialog>
+</SfDialog> *@
+
+
+@* Confirmation DIalog *@
+<ConfirmPage @ref="ConfirmSaveOrder" ConfirmHeaderMessage="@ConfirmHeaderMessage" ConfirmContentMessage="@ConfirmContentMessage" ConfirmationChanged="OrderSaveProcess" />
 
 <style>
     .grid-container {
@@ -341,10 +369,54 @@
         column-gap: 10px; /* Tgap betwen columns */
     }
 
+    .e-numeric.e-style .e-control.e-numerictextbox {
+        text-align: right;
+        padding: 0px 5px 0px 0px;
+    }
+
+    .head, .item {
+        display: table;
+        width: 100%;
+        margin: auto;
+        text-align: left;
+    }
+
+    .head {
+        height: 30px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .productcode {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: left;
+        width: 25%;
+    }
+
+    .description {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: left;
+        width: 75%;
+    }
+
+    .head .productcode {
+        text-indent: 17px;
+    }
+
+    .head .description {
+        text-indent: 14px;
+    }
+
 </style>
 
 
 @code {
+    ConfirmPage ConfirmDeletion;
+
+
+
     //validate supplierEnabled
     public bool supplierEnabled { get; set; }= true;
 
@@ -353,6 +425,13 @@
 
     private int tmpPOLineID { get; set; } = 0;
     private int selectedPOLineID { get; set; } = 0;
+
+    //Confirmation vars
+    ConfirmPage ConfirmSaveOrder;
+    string ConfirmHeaderMessage="";
+    string ConfirmContentMessage="";
+    public bool ConfirmationChanged { get; set; } = false;
+
 
 
     // Warning vars
@@ -445,55 +524,25 @@
     // Executes OnValidSubmit of EditForm above
     protected async Task OrderSave()
     {
-        if (POHeaderID == 0)
+        if (orderaddedit.POHeaderSupplierID == 0)
         {
-            //Save the record
-            //bool Successs = await POHeaderService.POHeaderInsert(orderaddedit);
-            int HeaderID = await POHeaderService.POHeaderInsert(
-                orderaddedit.POHeaderOrderDate,
-                orderaddedit.POHeaderSupplierID,
-                orderaddedit.POHeaderSupplierAddress1,
-                orderaddedit.POHeaderSupplierAddress2,
-                orderaddedit.POHeaderSupplierAddress3,
-                orderaddedit.POHeaderSupplierPostCode,
-                orderaddedit.POHeaderSupplierEmail,
-                orderaddedit.POHeaderRequestedBy
-            );
-            foreach(var individualPOLine in orderLines){       
-                individualPOLine.POLineHeaderID = HeaderID;
-                bool Success = await POLineService.POLineInsert(individualPOLine);
-            }
-            NavigationManager.NavigateTo("/");
+            WarningHeaderMessage="Warning!";
+            WarningContentMessage = "Please Selec a Supplier before saving the order";
+            Warning.OpenDialog();
+            return;
+        }
+        
+        if (orderLines.Count == 0)
+        {
+            ConfirmHeaderMessage = "Confirm Save!";
+            ConfirmContentMessage = "There are no order lines. Please confirm order should be saved.";
+            ConfirmSaveOrder.OpenDialog();
         }
         else
-
         {
-            bool Success = await POHeaderService.POHeaderUpdate(orderaddedit);
-
-            foreach(var individualPOLine in orderLines)
-
-            {
-                //positive ---> exists  row (update)
-                if (individualPOLine.POLineID > 0)
-                {
-                    Success = await POLineService.POLineUpdate(individualPOLine);
-                }
-                else
-                {
-                    individualPOLine.POLineHeaderID = POHeaderID;
-
-                    Success = await POLineService.POLineInsert(individualPOLine);
-                }
-            }
-
-            foreach (var individualPOLine in OrderLinesToBeDeleted)
-            {
-                Success = await POLineService.POLineDeleteOne(individualPOLine);
-            }
-            OrderLinesToBeDeleted.Clear();
-            NavigationManager.NavigateTo("/");
-
+            await OrderSaveProcess(true);
         }
+
     }
 
     //Executes if user clicks the Cancel button.
@@ -560,6 +609,9 @@
             }
             else
             {
+                ConfirmHeaderMessage = "Confirm Deletion";
+                ConfirmContentMessage = "Please confirm that this order line should be deleted.";
+                ConfirmDeletion.OpenDialog();
                 await this.DialogDeleteOrderLine.ShowAsync();
             }
         }
@@ -685,23 +737,71 @@
         addeditOrderLine.POLineGrossPrice = addeditOrderLine.POLineNetPrice.Value * (1 + addeditOrderLine.POLineTaxRate);
     }
 
+   
+
+
+  
+
+
+    /*Part of NO LINES Order*/
+
+    protected async Task OrderSaveProcess(bool saveConfirmed)
+    {
+        if (saveConfirmed)
+        {
+            if (POHeaderID == 0)
+            {
+                //Save the record
+                //bool Successs = await POHeaderService.POHeaderInsert(orderaddedit);
+                int HeaderID = await POHeaderService.POHeaderInsert(
+                    orderaddedit.POHeaderOrderDate,
+                    orderaddedit.POHeaderSupplierID,
+                    orderaddedit.POHeaderSupplierAddress1,
+                    orderaddedit.POHeaderSupplierAddress2,
+                    orderaddedit.POHeaderSupplierAddress3,
+                    orderaddedit.POHeaderSupplierPostCode,
+                    orderaddedit.POHeaderSupplierEmail,
+                    orderaddedit.POHeaderRequestedBy
+                );
+                foreach (var individualPOLine in orderLines)
+                {
+                    individualPOLine.POLineHeaderID = HeaderID;
+                    bool Success = await POLineService.POLineInsert(individualPOLine);
+                }
+                NavigationManager.NavigateTo("/");
+            }
+            else
+
+            {
+                bool Success = await POHeaderService.POHeaderUpdate(orderaddedit);
+
+                foreach (var individualPOLine in orderLines)
+
+                {
+                    //positive ---> exists  row (update)
+                    if (individualPOLine.POLineID > 0)
+                    {
+                        Success = await POLineService.POLineUpdate(individualPOLine);
+                    }
+                    else
+                    {
+                        individualPOLine.POLineHeaderID = POHeaderID;
+
+                        Success = await POLineService.POLineInsert(individualPOLine);
+                    }
+                }
+
+                foreach (var individualPOLine in OrderLinesToBeDeleted)
+                {
+                    Success = await POLineService.POLineDeleteOne(individualPOLine);
+                }
+                OrderLinesToBeDeleted.Clear();
+                NavigationManager.NavigateTo("/");
+
+            }
+        }
+    }
     /*Part of Delete Dialog*/
-    public async void ConfirmDeleteNo()
-    {
-        await DialogDeleteOrderLine.HideAsync();
-        selectedPOLineID = 0;
-
-    }
-
-    public async void ConfirmDeleteYes()
-    {
-        OrderLineDelete();
-
-        await this.DialogDeleteOrderLine.HideAsync();
-        selectedPOLineID = 0;
-    }
-
-
     private void OrderLineDelete()
     {
         if (selectedPOLineID > 0)
@@ -718,5 +818,18 @@
         orderLines.Remove(itemToRemove);
         OrderLinesGrid.Refresh();
     }
+
+
+
+    protected void ConfirmDelete(bool deleteConfirmed)
+    {
+        if (deleteConfirmed)
+        {
+            OrderLineDelete();
+            StateHasChanged();
+            selectedPOLineID = 0;
+        }
+    }
+
 
 }

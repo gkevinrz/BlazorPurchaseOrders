@@ -1,0 +1,227 @@
+﻿@page "/previeworder/{POHeaderID:int}"
+@layout BlankLayout
+
+@using BlazorPurchaseOrders.Data
+@inject IPOHeaderService POHeaderService
+@inject IPOLineService POLineService
+
+<!DOCTYPE html>
+<html>
+<body>
+    @*----------------Logo and company name----------------------- *@
+    <div class="invoice-box">
+
+        <table>
+            <tr class="addressbar">
+                <td class="addressbar-left">
+                    <img src="https://blazorcode.uk/media/files/blazorcode_logo_small.png" style="width:100%; max-width:300px;" />
+
+                </td>
+                <td class="addressbar-right">
+                    blazorcode.uk <br />
+                    5 high Street <br />
+                    Trumpington <br />
+                    TR4A IRS
+                </td>
+            </tr>
+        </table>
+        <br />
+        @* ---------------Second header------------------------------- *@
+        <table>
+            <tr class="addressbar">
+                @* Supplier information *@
+                <td style="width:50%;">
+                    @orderHeader.SupplierName<br />
+                    @if (!String.IsNullOrEmpty(orderHeader.POHeaderSupplierAddress1))
+                    {
+                        @orderHeader.POHeaderSupplierAddress1
+
+                        <br />
+                    }
+                    @if (!String.IsNullOrEmpty(orderHeader.POHeaderSupplierAddress2))
+                    {
+                        @orderHeader.POHeaderSupplierAddress2
+
+                        <br />
+                    }
+                    @if (!String.IsNullOrEmpty(orderHeader.POHeaderSupplierAddress3))
+                    {
+                        @orderHeader.POHeaderSupplierAddress3
+
+                        <br />
+                    }
+
+               
+                </td>
+                @* Header *@
+                <td style="width:15%;">
+                    Order No <br />
+                    Order Date<br />
+                    Contact
+                </td>
+                <td style="width:35%;">
+                    : @orderHeader.POHeaderOrderNumber<br />
+                    : @orderHeader.POHeaderOrderDate.ToShortDateString()<br />
+                    : @orderHeader.POHeaderRequestedBy
+
+                </td>
+
+            </tr>
+
+        </table>
+
+        <br />
+
+        @*------------------- Purchase Order Body---------------- *@
+        <table>
+            <tr class="doctype">
+                <td>PURCHASE ORDER</td>
+            </tr>
+        </table>
+        <br />
+        @*--------------------------Order Lines ----------------------- *@
+        <table>
+            @* ***Column names**** *@
+            <tr class="heading">
+                <th>Code</th>
+                <th>Description</th>
+
+                <th class="Column-right">Quantity</th>
+                <th class="Column-right">Unit Price</th>
+                <th class="Column-right">Net Price</th>
+                <th class="Column-right">Tax Rate</th>
+                <th class="Column-right">Tax</th>
+
+                <th class="Column-right">Total</th>
+
+            </tr>
+
+            @* ***Items*** *@
+
+            @foreach (var orderline in orderLines)
+            {
+                <tr class="item">
+                    <td>@orderline.POLineProductCode</td>
+                    <td>@orderline.POLineProductDescription</td>
+                    <td class="Column-right">@String.Format("{0:N0}", orderline.POLineProductQuantity)</td>
+                    <td class="Column-right">@String.Format("{0:C2}", orderline.POLineProductUnitPrice)</td>
+                    <td class="Column-right">@String.Format("{0:C2}", orderline.POLineNetPrice)</td>
+                    <td class="Column-right">@String.Format("{0:P2}", orderline.POLineTaxRate)</td>
+                    <td class="Column-right">@String.Format("{0:C2}", orderline.POLineTaxAmount)</td>
+                    <td class="Column-right">@String.Format("{0:C2}", orderline.POLineGrossPrice)</td>
+                </tr>
+            }
+
+            @* ***Footer*** *@
+
+            <tr class="totals">
+                <td></td>
+                <td class="Column-left">Order Total:</td>
+                <td></td>
+                <td></td>
+                <td>@String.Format("{0:C2}", orderHeader.NetPrice)</td>
+                <td></td>
+                <td>@String.Format("{0:C2}", orderHeader.Tax)</td>
+                <td>@String.Format("{0:C2}", orderHeader.TotalOrderValue)</td>
+            </tr>
+
+
+        </table>
+
+
+    </div>
+
+
+
+</body>
+</html>
+<style>
+    .invoice-box {
+        max-width: 1000px;
+        margin: auto;
+        padding: 30px;
+        border: 1px solid #eee;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        font-size: 16px;
+        line-height: 24px;
+        font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+        color: #555;
+    }
+
+        .invoice-box table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+        }
+
+    .addressbar {
+        vertical-align: top;
+    }
+
+    .addressbar-left {
+        text-align: left;
+    }
+
+    .addressbar-right {
+        text-align: right;
+        font-weight: bold;
+        padding-top: 5px;
+    }
+
+    .doctype {
+        background: #21618C;
+        font-size: 20px;
+        line-height: 50px;
+        color:white;
+        font-weight: bold;
+        text-align: center
+    }
+
+    .heading {
+        background: #eee;
+        border-bottom: 1px solid #ddd;
+        font-weight: bold;
+    }
+
+    .Column-left {
+        text-align: left;
+    }
+
+    .Column-right {
+        text-align: right;
+    }
+
+    .item {
+        border-bottom: 1px solid #eee;
+    }
+
+    .totals {
+        background: #eee;
+        font-weight: bold;
+        line-height: 40px;
+        text-align: right;
+    }
+</style>
+@code{
+
+    IEnumerable<POLine> orderLinesByPOHeader;
+    public List<POLine> orderLines = new List<POLine>();
+
+    POHeader orderHeader = new POHeader();
+
+
+
+    [Parameter]
+    public int POHeaderID { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        orderHeader = await POHeaderService.POHeader_GetOne(POHeaderID);
+        orderLinesByPOHeader = await POLineService.POLine_GetByPOHeader(POHeaderID);
+
+        orderLines = orderLinesByPOHeader.ToList();
+
+    }
+
+}

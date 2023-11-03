@@ -32,7 +32,9 @@ namespace BlazorPurchaseOrders.Data
         //sql modified
         public string SupplierName { get; }
         public decimal TotalOrderValue { get; }
+        public decimal NetPrice { get; }
 
+        public decimal Tax { get; }
 
     }
 }

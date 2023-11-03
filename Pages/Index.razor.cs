@@ -4,6 +4,7 @@ using Syncfusion.Blazor.Navigations;
 using System.Diagnostics;
 using Syncfusion.Blazor.Grids;
 using BlazorPurchaseOrders.Shared;
+using Microsoft.JSInterop;
 
 namespace BlazorPurchaseOrders.Pages
 {
@@ -11,11 +12,20 @@ namespace BlazorPurchaseOrders.Pages
     {
         [Inject] IPOHeaderService POHeaderService { get; set; }
         [Inject] NavigationManager NavigationManager { get; set; }
+        [Inject]        IJSRuntime IJS {  get; set; }
         /* Warning Vars*/
 
         WarningPage Warning;
         string WarningHeaderMessage = "";
         string WarningContentMessage = "";
+        /*Confirmation Dialog vars*/
+        ConfirmPage ConfirmOrderDelete;
+        string ConfirmHeaderMessage = "";
+        string ConfirmContentMessage = "";
+        public bool ConfirmationChanged { get; set; } = false;
+        /*Get one purchase order*/
+        POHeader orderHeader = new POHeader();
+
 
 
         // Create an empty list, named poheader, of empty POHeader objects.
@@ -35,10 +45,11 @@ namespace BlazorPurchaseOrders.Pages
             Toolbaritems.Add(new ItemModel() { Text = "Add", TooltipText = "Add a new order", PrefixIcon = "e-add" });
             Toolbaritems.Add(new ItemModel() { Text = "Edit", TooltipText = "Edit selected order", PrefixIcon = "e-edit" });
             Toolbaritems.Add(new ItemModel() { Text = "Delete", TooltipText = "Delete selected order", PrefixIcon = "e-delete" });
+            Toolbaritems.Add(new ItemModel() { Text="Preview", TooltipText="Preview selected order",PrefixIcon="e-print"});
         }
 
         ///Handlers-----------------------------------
-        public void ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+        public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
         {
             if (args.Item.Text == "Add")
             {
@@ -62,18 +73,64 @@ namespace BlazorPurchaseOrders.Pages
                     NavigationManager.NavigateTo($"/purchaseorder/{selectedPOHeaderID}");
                 }
             }
+            //part of delete purchase order
+            if (args.Item.Text == "Delete")
+            {   
+                if(selectedPOHeaderID == 0) {
+                    WarningHeaderMessage = "Warning!";
+                    WarningContentMessage = "Please select an Order from the grid.";
 
-            if (args.Item.Text == "Edit")
+                    Warning.OpenDialog();
+
+                }
+                else
+                {
+                    //get purchase order
+                    orderHeader= await POHeaderService.POHeader_GetOne(selectedPOHeaderID);
+
+                    //confirmation
+                    ConfirmHeaderMessage = "Confirm Deletion";
+                    ConfirmContentMessage = "Please confirm that this order should be deleted.";
+
+                    ConfirmOrderDelete.OpenDialog();
+                }
+            }
+
+
+            if (args.Item.Text == "Preview")
             {
-                //Code for deleting
+                if (selectedPOHeaderID == 0)
+                {
+                    WarningHeaderMessage = "Warning!";
+                    WarningContentMessage = "Please select an Order from the grid.";
+                    Warning.OpenDialog();
+
+                }
+                else
+                {
+                    await IJS.InvokeAsync<object>("open", new object[] { "/previeworder/" + selectedPOHeaderID + "", "_blank" });
+                    //NavigationManager.NavigateTo($"/previeworder/{selectedPOHeaderID}");
+                }
             }
         }
-
+        /*Handler*/
         public void RowSelectHandler(RowSelectEventArgs<POHeader> args) {
 
             selectedPOHeaderID = args.Data.POHeaderID;
         }
 
-
+        protected async Task ConfirmOrderArchive(bool archiveConfirmed)
+        {
+            if (archiveConfirmed)
+            {
+                //change attribute
+                orderHeader.POHeaderIsArchived= true;
+                
+                bool success= await POHeaderService.POHeaderUpdate(orderHeader);
+             
+                poheader = await POHeaderService.POHeaderList();
+                StateHasChanged();
+            }
+        }
     }
 }
