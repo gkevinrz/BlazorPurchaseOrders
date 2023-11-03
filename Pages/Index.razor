@@ -9,24 +9,40 @@
     <br />
     <SfGrid DataSource="@poheader"
             Toolbar="Toolbaritems">
-        <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="POHeader"></GridEvents>
+        <GridEvents RowSelected="RowSelectHandler" OnToolbarClick="ToolbarClickHandler" TValue="POHeader"></GridEvents>
         <GridColumns>
             <GridColumn Field="@nameof(POHeader.POHeaderOrderNumber)"
                         HeaderText="Order No"
                         TextAlign="@TextAlign.Left"
-                        Width="20">
+                        Width="10">
             </GridColumn>
             <GridColumn Field="@nameof(POHeader.POHeaderOrderDate)"
                         HeaderText="Date"
                         Format="d"
                         Type="ColumnType.Date"
                         TextAlign="@TextAlign.Center"
-                        Width="20">
+                        Width="15">
             </GridColumn>
+            
+            <GridColumn Field="@nameof(POHeader.SupplierName)" HeaderText="Supplier" TextAlign="@TextAlign.Left"
+            Width="40">
+            </GridColumn>
+
+            <GridColumn Field="@nameof(POHeader.TotalOrderValue)" HeaderText="Total" TextAlign="@TextAlign.Right" Format="C2" Width="20">
+
+            </GridColumn>
+    
+            <GridColumn Field="@nameof(POHeader.POHeaderRequestedBy)" HeaderText="Requested by" TextAlign="@TextAlign.Left" Width="40"></GridColumn>
+
+
         </GridColumns>
     </SfGrid>
 
 </div>
+
+@* Warning Component *@
+<WarningPage @ref="Warning" WarningHeaderMessage="@WarningHeaderMessage" WarningContentMessage="@WarningContentMessage" />
+
 
 
 

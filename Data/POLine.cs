@@ -12,8 +12,8 @@ namespace BlazorPurchaseOrders.Data
         public int POLineHeaderID { get; set; }
         [Required]
         public int POLineProductID { get; set; }
-        [Required]
-        [StringLength(50)]
+        [Required(ErrorMessage ="Product Description is compulsory")]
+        [StringLength(50,MinimumLength =2,ErrorMessage ="Product Description mustbe between 2 and 20 characters")]
         public string POLineProductDescription { get; set; }
         [Required]
         public decimal POLineProductQuantity { get; set; }

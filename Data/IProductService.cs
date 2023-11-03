@@ -17,5 +17,8 @@ namespace BlazorPurchaseOrders.Data
                 int ProductSupplierID,
                 bool ProductIsArchived
                 );
+
+        Task<IEnumerable<Product>> ProductListBySupplier(int SupplierID);
+
     }
 }

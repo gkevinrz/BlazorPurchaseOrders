@@ -34,6 +34,7 @@ namespace BlazorPurchaseOrders.Data
                 parameters.Add("POLineProductQuantity", poline.POLineProductQuantity, DbType.Decimal);
                 parameters.Add("POLineProductUnitPrice", poline.POLineProductUnitPrice, DbType.Decimal);
                 parameters.Add("POLineTaxRate", poline.POLineTaxRate, DbType.Decimal);
+                parameters.Add("POLineTaxID", poline.POLineTaxID, DbType.Int32);
 
                 // call store procedure
                 await conn.ExecuteAsync("spPOLine_Insert", parameters, commandType: CommandType.StoredProcedure);
@@ -83,13 +84,42 @@ namespace BlazorPurchaseOrders.Data
                 parameters.Add("POLineProductQuantity", poline.POLineProductQuantity, DbType.Decimal);
                 parameters.Add("POLineProductUnitPrice", poline.POLineProductUnitPrice, DbType.Decimal);
                 parameters.Add("POLineTaxRate", poline.POLineTaxRate, DbType.Decimal);
+
+                parameters.Add("POLineTaxID", poline.POLineTaxID, DbType.Decimal);
+
                 // call procedure
                 await conn.ExecuteAsync("spPOLine_Update", parameters, commandType: CommandType.StoredProcedure);
             }
             return true;
         }
 
+        /* SQL Select (read) - get all rows by poheaderid */
+        public async Task<IEnumerable<POLine>> POLine_GetByPOHeader(int @POHeaderID)
+        {
+            IEnumerable<POLine> polines;
+            var parameters = new DynamicParameters();
+            parameters.Add("@POHeaderID", POHeaderID, DbType.Int32);
+            using (var conn = new SqlConnection(_configuration.Value))
+            {
+                polines = await conn.QueryAsync<POLine>("spPOLine_GetByPOHeader", parameters, commandType: CommandType.StoredProcedure);
+            }
+            return polines;
+        }
 
 
+        /* Delete row from POLine table (not archived)*/
+
+
+        public async Task<bool> POLineDeleteOne(int @POLineID)
+        {
+            var parameters=new DynamicParameters();
+            parameters.Add("@POLineID", POLineID, DbType.Int32);
+
+            using (var conn = new SqlConnection(_configuration.Value))
+            {
+                await conn.ExecuteAsync("spPOLine_DeleteOne",parameters,commandType: CommandType.StoredProcedure);
+            }
+            return true;
+        }
     }
 }

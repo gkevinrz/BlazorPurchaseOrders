@@ -13,8 +13,11 @@ namespace BlazorPurchaseOrders.Data
         //get one
         Task<POLine> POLine_GetOne(int POLineID);
         // update one 
-        Task<bool> POLineUpdate(POLine poline); 
+        Task<bool> POLineUpdate(POLine poline);
+
+        Task<IEnumerable<POLine>> POLine_GetByPOHeader(int @POHeaderI);
 
 
+        Task<bool> POLineDeleteOne(int @POLineID);
     }
 }
